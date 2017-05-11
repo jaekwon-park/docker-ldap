@@ -44,13 +44,13 @@ function kill_slapd {
 
 function start_slapd {
 	echo "Starting temporary slapd to modify dynamic config."
-	/usr/sbin/slapd -F /config -u openldap -g openldap -h 'ldapi:// ldap://' -d 255 &
+	/usr/sbin/slapd -F /config -u openldap -g openldap -h 'ldapi:/// ldap:///' -u openldap -g openldap  -d 255 &
 	dpid=$!
 	echo "strated temporary slapd. $dpid" 
 }
 
 
-chown -R openldap:openldap /config /data || fail "Cannot change owner of supplied volumes."
+chown -R 104:107 /config /data || fail "Cannot change owner of supplied volumes."
 
 if [[ ! -d '/config/cn=config' ]] ; then
 	# supplied empty config volume, use defaults
@@ -72,4 +72,4 @@ if [[ ! -d '/config/cn=config' ]] ; then
 fi
 
 echo "Starting slapd."
-exec /usr/sbin/slapd -F /config -u openldap -g openldap -h 'ldapi:// ldap://' -d stats
+exec /usr/sbin/slapd -F /config -u openldap -g openldap -h 'ldapi:/// ldap:///' -d stats
