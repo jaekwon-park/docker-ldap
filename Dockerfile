@@ -1,4 +1,5 @@
-FROM phusion/baseimage:latest
+FROM debian:jessie
+
 MAINTAINER Jaekwon Park <jaekwon.park@code-post.com>
 
 EXPOSE 389
