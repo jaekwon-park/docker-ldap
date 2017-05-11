@@ -1,4 +1,4 @@
-FROM phusion/baseimage:0.9.15
+FROM phusion/baseimage:latest
 MAINTAINER Jaekwon Park <jaekwon.park@code-post.com>
 
 EXPOSE 389
