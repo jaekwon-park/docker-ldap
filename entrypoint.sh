@@ -29,6 +29,7 @@ function timeout {
 	kill -KILL $dpid
 	fail "Timeout stopping temporary slapd instance."
 }
+
 function kill_slapd {
 	trap timeout ALRM
 	sleep 5 && kill -ALRM $$ &
@@ -44,7 +45,8 @@ function kill_slapd {
 function start_slapd {
 	echo "Starting temporary slapd to modify dynamic config."
 	/usr/sbin/slapd -F /config -u openldap -g openldap -h ldapi:// -d stats &
-	echo "strated temporary slapd. $!" 
+	dpid=$!
+	echo "strated temporary slapd. $dpid" 
 }
 
 
@@ -57,16 +59,17 @@ if [[ ! -d '/config/cn=config' ]] ; then
 	[[ "${CONF_ROOTPW:0:1}" == '{' ]] || CONF_ROOTPW=`slappasswd -s "$CONF_ROOTPW"`
 	cp -a /etc/ldap/slapd.d/. /config/
 	start_slapd
-	dpid=$!
 
 	CONFIGURED=0
 	for i in {1..10} ; do
 		sleep 1
 		configure && CONFIGURED=1
+		if [ $CONFIGURED -eq 0 ]]
+		then
+			kill_slapd $dpid
+			start_slapd
+		fi
 		[[ $CONFIGURED -eq 1 ]] && break
-		kill_slapd $dpid
-		start_slapd
-		dpid=$!
 	done
 	[[ $CONFIGURED -ne 1 ]] && fail "Unable to configure slapd (timeout?)."
 	echo "Stopping temporary slapd."
