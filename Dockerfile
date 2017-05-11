@@ -8,8 +8,8 @@ EXPOSE 389
 RUN apt-get update \
 	&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends slapd ldap-utils \
 	&& apt-get clean && rm -rf /var/lib/apt/lists/*
-COPY entrypoint /
-RUN chmod 0755 /entrypoint \
+COPY entrypoint.sh /
+RUN chmod 0755 /entrypoint.sh \
 	&& rm -r /var/lib/ldap \
 	&& mkdir /config \
 	&& mkdir /data \
@@ -17,4 +17,4 @@ RUN chmod 0755 /entrypoint \
 	&& ln -s /data /var/lib/ldap
 VOLUME /data
 VOLUME /config
-CMD ["/entrypoint"]
+CMD ["/entrypoint.sh"]
