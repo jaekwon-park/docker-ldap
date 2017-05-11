@@ -44,7 +44,7 @@ function kill_slapd {
 
 function start_slapd {
 	echo "Starting temporary slapd to modify dynamic config."
-	/usr/sbin/slapd -F /config -u openldap -g openldap -h 'ldapi:/// ldap:///' -u openldap -g openldap  -d 255 &
+	/usr/sbin/slapd -F /config -u 104 -g 107 -h 'ldapi:/// ldap:///' -d 255 &
 	dpid=$!
 	echo "strated temporary slapd. $dpid" 
 }
@@ -72,4 +72,4 @@ if [[ ! -d '/config/cn=config' ]] ; then
 fi
 
 echo "Starting slapd."
-exec /usr/sbin/slapd -F /config -u openldap -g openldap -h 'ldapi:/// ldap:///' -d stats
+exec /usr/sbin/slapd -F /config -u 104 -g 107 -h 'ldapi:/// ldap:///' -d stats
