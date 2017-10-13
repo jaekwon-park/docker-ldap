@@ -7,7 +7,7 @@ EXPOSE 389
 # runs as user openldap(104), group openldap(107)
 
 RUN apt-get update \
-	&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends slapd ldap-utils \
+	&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends slapd ldap-utils libmyodbc \
 	&& apt-get clean && rm -rf /var/lib/apt/lists/*
 COPY entrypoint.sh /
 RUN chmod 0755 /entrypoint.sh \
