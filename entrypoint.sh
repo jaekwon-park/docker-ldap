@@ -133,4 +133,4 @@ function start_slapd {
 
 echo "Starting slapd."
 #exec /usr/sbin/slapd -u openldap -g openldap -h 'ldapi:/// ldap:///' -d stats #-f /etc/ldap/slapd.conf -F /config
-exec /usr/local/libexec/slapd -u openldap -g openldap -h 'ldapi:/// ldap:///' -d debug -f /usr/local/etc/openldap/slapd.conf
+exec /usr/local/libexec/slapd -u openldap -g openldap -h 'ldapi:/// ldap:///' -d stats -f /usr/local/etc/openldap/slapd.conf
