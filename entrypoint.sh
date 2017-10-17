@@ -125,4 +125,4 @@ if [[ ! -d '/config/cn=config' ]] ; then
 fi
 
 echo "Starting slapd."
-exec /usr/sbin/slapd -F /config -u openldap -g openldap -h 'ldapi:/// ldap:///' -d stats #-f /etc/ldap/slapd.conf
+exec /usr/sbin/slapd -u openldap -g openldap -h 'ldapi:/// ldap:///' -d stats #-f /etc/ldap/slapd.conf -F /config
