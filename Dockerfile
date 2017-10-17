@@ -20,7 +20,7 @@ RUN apt-get update \
 
 RUN wget ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/openldap-2.4.26.tgz -O /tmp/openldap-2.4.26.tgz && \
 tar xvfz /tmp/openldap-2.4.26.tgz -C /tmp/ && cd /tmp/openldap-2.4.26 && ./configure --enable-sql && make depend && make && make install && \
-rm -rf /tmp/openldap*
+rm -rf /tmp/openldap* && apt-get purge -y -q --auto-remove libssl-dev libdb-dev unixodbc-dev time wget gcc make groff
 COPY entrypoint.sh /
 RUN chmod 0755 /entrypoint.sh 
 CMD ["/entrypoint.sh"]
