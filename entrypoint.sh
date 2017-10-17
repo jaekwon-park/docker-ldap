@@ -1,4 +1,4 @@
-/bin/bash
+#!/bin/bash
 
 function file_env() {
 	local var="$1"
@@ -24,48 +24,62 @@ function fail {
 	exit 1
 }
 
-function configure {
-	ldapmodify -Y EXTERNAL -H ldapi:/// <<-_EOF
-		dn: olcDatabase={1}mdb,cn=config
-		replace: olcRootPW
-		olcRootPW: $CONF_ROOTPW
-		-
-		replace: olcSuffix
-		olcSuffix: $CONF_BASEDN
-		-
-		replace: olcRootDN
-		olcRootDN: cn=admin,$CONF_BASEDN
-
-		dn: olcDatabase={0}config,cn=config
-		replace: olcRootPW
-		olcRootPW: $CONF_ROOTPW
-		_EOF
-	return $?
-}
-
 function odbc_configure {
   cat << EOF > /etc/odbc.ini 
-[ldap]
-Description = LdapToMysql
-Driver = MySQL
-Database = ldap
-Server = $LDAP_MYSQL_SERVER
-User = $LDAP_MYSQL_USER
-Password = $LDAP_MYSQL_PASS
-Port = 3306
-EOF 
+[openldap]
+Description         = LdapToMysql
+Driver              = MySQL
+Trace               = No
+Database            = $LDAP_MYSQL_DB
+Server              = $LDAP_MYSQL_SERVER
+User                = $LDAP_MYSQL_USER
+Password            = $LDAP_MYSQL_PASS
+Port                = 3306
+ReadOnly            = No
+RowVersioning       = No
+ShowSystemTables    = No
+ShowOidColumn       = No
+FakeOidIndex        = No
+EOF
 
-  cat << EOF > /etc/ldap/slapd.conf
+  cat << EOF > /etc/odbcinst.ini
+[MySQL]
+Description     = ODBC for MySQL
+Driver          = /usr/lib/odbc/libmyodbc.so
+FileUsage       = 1
+EOF
+
+  cat << EOF > /usr/local/etc/openldap/slapd.conf
+# $OpenLDAP$
+#
+# See slapd.conf(5) for details on configuration options.
+# This file should NOT be world readable.
+#
+include         /usr/local/etc/openldap/schema/core.schema
+include         /usr/local/etc/openldap/schema/cosine.schema
+include         /usr/local/etc/openldap/schema/inetorgperson.schema
+ 
+# Define global ACLs to disable default read access.
+ 
+# Do not enable referrals until AFTER you have a working directory
+# service AND an understanding of referrals.
+#referral       ldap://root.openldap.org
+ 
+pidfile         /usr/local/var/slapd.pid
+argsfile        /usr/local/var/slapd.args
 #######################################################################
 # sql database definitions
 #######################################################################
 database sql
-# Only need if not using the ldbm/bdb stuff below
+suffix          "$CONF_BASEDN"
+rootdn          "cn=admin,$CONF_BASEDN"
+rootpw          $CONF_ROOTPW
 dbname $LDAP_MYSQL_DB
 dbuser $LDAP_MYSQL_USER
 dbpasswd $LDAP_MYSQL_PASS
 has_ldapinfo_dn_ru no
 subtree_cond "ldap_entries.dn LIKE CONCAT('%',?)"
+insentry_stmt   "INSERT INTO ldap_entries (dn,oc_map_id,parent,keyval) VALUES (?,?,?,?)"
 EOF
 	return $?
 }
@@ -91,14 +105,12 @@ function kill_slapd {
 
 function start_slapd {
 	echo "Starting temporary slapd to modify dynamic config."
-	/usr/sbin/slapd -F /config -u openldap -g openldap -h 'ldapi:/// ldap:///' -d 1 &
+	/usr/local/libexec/slapd -u openldap -g openldap -h 'ldapi:/// ldap:///' -d 1 &
 	dpid=$!
 	echo "strated temporary slapd. $dpid" 
 }
 
-chown -R openldap:openldap /config /data || fail "Cannot change owner of supplied volumes."
-
-if [[ ! -d '/config/cn=config' ]] ; then
+#chown -R openldap:openldap /config /data || fail "Cannot change owner of supplied volumes."
   file_env 'CONF_BASEDN'
   file_env 'CONF_ROOTPW'
   file_env 'LDAP_MYSQL_SERVER'
@@ -109,21 +121,16 @@ if [[ ! -d '/config/cn=config' ]] ; then
 	[[ -z "$CONF_ROOTPW" ]] && fail "No existing config found and CONF_ROOTPW not given."
 	[[ -z "$CONF_BASEDN" ]] && fail "No existing config found and CONF_BASEDN not given."
 	[[ "${CONF_ROOTPW:0:1}" == '{' ]] || CONF_ROOTPW=`slappasswd -s "$CONF_ROOTPW"`
-	cp -a /etc/ldap/slapd.d/. /config/
-	start_slapd
 
 	CONFIGURED=0
 	for i in {1..10} ; do
 		sleep 1
-		configure && odbc_configure && CONFIGURED=1
+		odbc_configure && CONFIGURED=1
 		[[ $CONFIGURED -eq 1 ]] && break
 	done
 
 	[[ $CONFIGURED -ne 1 ]] && fail "Unable to configure slapd (timeout?)."
-	echo "Stopping temporary slapd."
-	kill_slpad $dpid
-fi
 
 echo "Starting slapd."
 #exec /usr/sbin/slapd -u openldap -g openldap -h 'ldapi:/// ldap:///' -d stats #-f /etc/ldap/slapd.conf -F /config
-/usr/sbin/slapd -u openldap -g openldap -h 'ldapi:/// ldap:///' -d debug #-f /etc/ldap/slapd.conf -F /config
+exec /usr/local/libexec/slapd -u openldap -g openldap -h 'ldapi:/// ldap:///' -d debug -f /usr/local/etc/openldap/slapd.conf
