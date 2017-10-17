@@ -1,11 +1,11 @@
-FROM ubuntu:16:04
+FROM ubuntu:16.04
 
 MAINTAINER Jaekwon Park <jaekwon.park@code-post.com>
 
 EXPOSE 389
 
 # runs as user openldap(104), group openldap(107)
-#RUN groupadd -r openldap && useradd -r -g openldap openldap
+RUN groupadd -r openldap && useradd -r -g openldap openldap
 
 RUN apt-get update \
 	&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends slapd ldap-utils libmyodbc \
