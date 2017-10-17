@@ -74,11 +74,11 @@ database sql
 suffix          "$CONF_BASEDN"
 rootdn          "cn=admin,$CONF_BASEDN"
 rootpw          $CONF_ROOTPW
-dbname $LDAP_MYSQL_DB
-dbuser $LDAP_MYSQL_USER
-dbpasswd $LDAP_MYSQL_PASS
+dbname          $LDAP_MYSQL_DB
+dbuser          $LDAP_MYSQL_USER
+dbpasswd        $LDAP_MYSQL_PASS
 has_ldapinfo_dn_ru no
-subtree_cond "ldap_entries.dn LIKE CONCAT('%',?)"
+subtree_cond    "ldap_entries.dn LIKE CONCAT('%',?)"
 insentry_stmt   "INSERT INTO ldap_entries (dn,oc_map_id,parent,keyval) VALUES (?,?,?,?)"
 EOF
 	return $?
@@ -120,7 +120,7 @@ chown -R openldap:openldap /usr/local/etc/openldap || fail "Cannot change owner 
 	# supplied empty config volume, use defaults
 	[[ -z "$CONF_ROOTPW" ]] && fail "No existing config found and CONF_ROOTPW not given."
 	[[ -z "$CONF_BASEDN" ]] && fail "No existing config found and CONF_BASEDN not given."
-	[[ "${CONF_ROOTPW:0:1}" == '{' ]] || CONF_ROOTPW=`slappasswd -s "$CONF_ROOTPW"`
+#[[ "${CONF_ROOTPW:0:1}" == '{' ]] || CONF_ROOTPW=`slappasswd -s "$CONF_ROOTPW"`
 
 	CONFIGURED=0
 	for i in {1..10} ; do
