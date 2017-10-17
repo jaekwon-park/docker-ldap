@@ -110,7 +110,7 @@ function start_slapd {
 	echo "strated temporary slapd. $dpid" 
 }
 
-#chown -R openldap:openldap /config /data || fail "Cannot change owner of supplied volumes."
+chown -R openldap:openldap /usr/local/etc/openldap || fail "Cannot change owner of supplied volumes."
   file_env 'CONF_BASEDN'
   file_env 'CONF_ROOTPW'
   file_env 'LDAP_MYSQL_SERVER'
