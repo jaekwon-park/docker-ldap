@@ -8,7 +8,7 @@ EXPOSE 389
 RUN groupadd -r openldap && useradd -r -g openldap openldap
 
 RUN apt-get update \
-	&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ldap-utils libmyodbc libssl-dev libdb-dev unixodbc-dev time wget gcc\
+	&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ldap-utils libmyodbc libssl-dev libdb-dev unixodbc-dev time wget gcc make \
   libsasl2-modules \
   libsasl2-modules-db \
   libsasl2-modules-gssapi-mit \
