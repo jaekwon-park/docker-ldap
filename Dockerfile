@@ -12,7 +12,7 @@ RUN apt-get update \
   openssl  && \
   wget ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/openldap-2.4.26.tgz -O /tmp/openldap-2.4.26.tgz && \
   tar xvfz /tmp/openldap-2.4.26.tgz -C /tmp/ && cd /tmp/openldap-2.4.26 && ./configure --enable-sql && make depend && make && make install && \
-  rm -rf /tmp/openldap* && apt-get purge -y -q --auto-remove wget && \
+  rm -rf /tmp/openldap* && apt-get purge -y -q --auto-remove build-essential && \
 	apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \ 
 COPY entrypoint.sh /
 RUN chmod 0755 /entrypoint.sh && chown -R openldap:openldap /usr/local/etc/openldap && chown -R openldap:openldap /usr/local/var/
